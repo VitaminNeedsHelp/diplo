@@ -111,8 +111,8 @@ Die App bietet einen **Admin-Modus**, einen **Editor**, einen **Viewer** und spe
 3. **Projektverzeichnis wechseln**:
    - `cd <projekt-verzeichnis>`
 4. **App starten**:
-5. - `python3 main.py`
-6. **App verwenden**:
+   - `python3 main.py`
+5. **App verwenden**:
    - Tutorials im Home-Screen anzeigen
    - Admin-Modus über unsichtbaren Login betreten
    - Tutorials erstellen, bearbeiten und löschen
