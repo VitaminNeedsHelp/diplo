@@ -1,26 +1,25 @@
 import os
 import tkinter as tk
-from config import IMAGES_DIR
 
 # Pillow optional verwenden
 try:
     from PIL import Image, ImageTk
     PIL_AVAILABLE = True
-except ImportError:
+except Exception:
     PIL_AVAILABLE = False
 
 
 def load_image_for_tk(path, max_width=None, max_height=None):
     """
-    Versucht, ein Bild zu laden und optional zu skalieren.
-    - Wenn Pillow verfügbar: skalieren möglich.
-    - Sonst: tk.PhotoImage (PNG/GIF), ohne Skalierung.
-    Gibt ein Tk-Image-Objekt zurück oder None.
+    Lädt ein Bild und gibt ein Tk-PhotoImage-Objekt zurück oder None.
+    - Erwartet: 'path' ist ein gültiger Dateipfad (absolut oder relativ, wie vom Aufrufer gegeben).
+    - Wenn Pillow verfügbar, wird optional skaliert.
+    - Falls kein Pillow, wird tk.PhotoImage verwendet (unterstützt PNG/GIF; JPEG nur mit Pillow).
     """
     if not path:
         return None
-    if not os.path.isabs(path):
-        path = os.path.join(IMAGES_DIR, path)
+
+    # Falls relativer Pfad => akzeptieren (Aufrufer sollte richtigen Pfad übergeben)
     if not os.path.exists(path):
         return None
 
@@ -33,8 +32,9 @@ def load_image_for_tk(path, max_width=None, max_height=None):
         except Exception:
             return None
 
+    # Fallback auf tk.PhotoImage (meistens PNG/GIF)
     try:
-        img = tk.PhotoImage(file=path)  # PNG/GIF
+        img = tk.PhotoImage(file=path)
         return img
     except Exception:
         return None
