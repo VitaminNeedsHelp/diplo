@@ -1,120 +1,85 @@
-# 📘 Raspberry Pi Tutorial System
+# 📘 Tutorial Display System – README
 
-Ein Touch-optimiertes Python GUI zur Anzeige & Verwaltung von Schritt-für-Schritt-Tutorials
-
----
-
-## 🖥️ Überblick
-
-Dieses Projekt ist ein vollständiges **Tutorial-Anzeige- und Verwaltungssystem** für den Raspberry Pi im **Hochformat** (z. B. 720×1280).  
-Es ist optimiert für:
-
-- Touchscreens
-- Produktions-/Werkstattumgebungen
-- Schulungs- und Infoterminals
-- Kiosk-Modus / Vollbildbetrieb
-
-Die App bietet einen **Admin-Modus**, einen **Editor**, einen **Viewer** und speichert alles automatisch in einer JSON-Datei.
+Ein touch-optimiertes GUI-System für Raspberry Pi und Windows, mit dem sich Schritt-für-Schritt-Anleitungen („Tutorials“) erstellen, verwalten und anzeigen lassen.  
+Alle Tutorials liegen in eigenen Ordnern und sind vollständig unabhängig voneinander.
 
 ---
 
-# 🚀 Features
+## 🚀 Hauptfunktionen
 
-## 👁️ Tutorial-Viewer
+### ✔ Tutorials anzeigen (Viewer)
 
-- Darstellung eines Tutorials mit:
-  - Titel
-  - Bild (PNG/JPG/GIF)
-  - Beschreibungstext
-- Navigation **Vor / Zurück**
-- Layout optimiert für Hochformat
+- Hochkant-Layout (ideal für Raspberry Pi Touchscreen)
+- Jede Seite besteht aus Titel, Bild und Text
+- Bilder werden automatisch skaliert
+- Navigationsbuttons sind fix am unteren Rand
+- Unterstützt beliebig viele Seiten
 
 ---
 
-## 📝 Tutorial-Editor (nur Admin)
+## ✔ Tutorials erstellen & bearbeiten (Editor)
 
-- Bearbeiten des Tutorial-Namens
-- Pro Seite:
-  - Seitentitel
-  - Bild auswählen
-  - Beschreibungstext
-- **Seite hinzufügen**
-- Seiten-Navigation
-- Änderungen speichern
+- Nur im Admin-Modus verfügbar
+- Funktionen:
+  - Tutorialtitel bearbeiten
+  - Seiten hinzufügen / wechseln
+  - Titel / Bild / Text pro Seite ändern
+  - Bilder werden automatisch in den jeweiligen Tutorial-Ordner kopiert
+  - Bildvorschau mit automatischer Größenanpassung
+  - Save-/Back-Buttons immer sichtbar
+
+---
+
+## ✔ Tutorials verwalten (Home Screen)
+
+- Automatische Ordner-Suche statt globalem Index
+- Zeigt alle Tutorials aus dem Ordner `tutorials/`
+- Funktionen:
+  - Tutorial anzeigen
+  - (Admin) Tutorial bearbeiten
+  - (Admin) Tutorial löschen
+  - (Admin) Neues Tutorial erstellen
 
 ---
 
 ## 🔐 Admin-Modus
 
-### Unsichtbarer Login
-
-- Auf dem Home-Screen **5× innerhalb von 5 Sekunden** auf „Tutorial-Home“ klicken
-- Passwort eingeben → Admin-Modus wird aktiviert
-
-### Admin-Funktionen:
-
-- Neues Tutorial erstellen
-- Tutorials bearbeiten
-- Tutorials löschen
-
-### Logout:
-
-- Über das **Einstellungsmenü**
+- Aktivierung über 5× Klick auf den Titel
+- Passwortabfrage
+- Admin-Rechte ermöglichen:
+  - Erstellen neuer Tutorials
+  - Bearbeiten von Tutorials
+  - Löschen von Tutorials
+- Deaktivierung über Einstellungen
 
 ---
 
-# 🏠 Home-Screen
+## 🔧 Systemanforderungen
 
-- Liste aller Tutorials
-- **Doppelklick** auf ein Tutorial → öffnet den Viewer
-- Buttons:
-  - Tutorial anzeigen
-  - (Admin) Neues Tutorial
-  - (Admin) Bearbeiten
-  - (Admin) Löschen
-  - Einstellungen
-
----
-
-# ⚙️ Einstellungen
-
-- Vollbildmodus an/aus
-- Schriftgröße einstellen
-- Admin-Logout
-- Einstellungen werden in `data.json` gespeichert
+- Raspberry Pi / Linux
+  - Python 3
+  - Tkinter
+  - Pillow (pip install pillow)
+- Windows
+  - Python 3
+  - - Tkinter (bereits enthalten)
+  - Pillow
 
 ---
 
-# 💾 Datenverwaltung
+## 🎮 Bedienung
 
-- Alle Tutorials und Einstellungen werden in `data.json` gespeichert
-- Bilder werden im `images/`-Ordner gespeichert
-- Automatisches Laden und Speichern
-- Einfache JSON-Struktur für Tutorials
-- Einfache Erweiterbarkeit
-- Backup- und Wiederherstellungsfunktionen
-
----
-
-# 🛠️ Installation & Nutzung
-
-1. **Voraussetzungen**:
-   - Raspberry Pi mit installiertem Raspbian OS
-   - Python 3.x
-   - Tkinter-Bibliothek (normalerweise vorinstalliert)
-   - Pillow-Bibliothek (`pip install Pillow`)
-2. **Projekt herunterladen**:
-   - Git-Repository klonen oder ZIP herunterladen und entpacken
-
-- `git clone <repository-url>`
-
-3. **Projektverzeichnis wechseln**:
-   - `cd <projekt-verzeichnis>`
-4. **App starten**:
-   - `python3 main.py`
-5. **App verwenden**:
-   - Tutorials im Home-Screen anzeigen
-   - Admin-Modus über unsichtbaren Login betreten
-   - Tutorials erstellen, bearbeiten und löschen
-
----
+- Home Screen
+  - Doppelklick auf ein Tutorial → Viewer
+  - Admin-Bereich sichtbar, wenn Admin aktiv
+- Viewer
+  - Navigation über Buttons unten
+  - Rückkehr zum Home Screen möglich
+- Editor
+  - Seiten hinzufügen
+  - Bilder auswählen (werden automatisch kopiert)
+  - Speichern aktualisiert die data.json des Tutorials
+- Einstellungen
+  - Vollbildmodus
+  - Schriftgröße
+  - Admin-Modus verlassen
