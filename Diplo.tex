@@ -1,0 +1,447 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{enumitem}
+\usepackage{float} % Für exakte Bildplatzierung mit [H]
+
+\geometry{margin=2.5cm}
+\onehalfspacing
+
+\begin{document}
+
+\title{Entwicklung eines interaktiven Tutorial- und Quiz-Systems \\ 
+für die Lehrlingswerkstatt der Firma Pankl}
+\author{Diplomarbeit}
+\date{\today}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ------------------------------------------------
+\chapter{Einleitung}
+
+Die Digitalisierung industrieller Ausbildungsprozesse gewinnt zunehmend an Bedeutung. Unternehmen stehen vor der Herausforderung, theoretisches Wissen und praktische Fähigkeiten effizient zu vermitteln und gleichzeitig moderne Technologien in bestehende Ausbildungsstrukturen zu integrieren. Besonders in technischen Lehrlingswerkstätten ist es erforderlich, Lerninhalte sowohl strukturiert als auch praxisnah aufzubereiten. Klassische Papierunterlagen oder statische Dokumentationen stoßen hierbei an ihre Grenzen, da sie weder interaktive Elemente noch eine adaptive Wissensüberprüfung ermöglichen.
+\\\\
+In der Lehrlingswerkstatt der Firma Pankl werden Auszubildende in unterschiedlichen technischen Bereichen geschult. Dabei spielen sowohl theoretische Grundlagen als auch praktische Aufbauten eine zentrale Rolle. Bislang erfolgte die Vermittlung von Arbeitsanleitungen überwiegend in statischer Form. Eine digitale, interaktive Lösung zur strukturierten Darstellung von Tutorials und integrierten Wissensabfragen war nicht vorhanden.
+\\\\
+Ziel dieser Diplomarbeit war die Entwicklung eines eigenständigen, interaktiven Tutorial- und Quiz-Systems, das speziell für den Einsatz in der Lehrlingswerkstatt konzipiert wurde. Das System sollte es ermöglichen, schrittweise Anleitungen zum Aufbau technischer Übungen bereitzustellen und ergänzend Quiz-Seiten zur Lernkontrolle einzubinden. Darüber hinaus sollte eine einfache Wartbarkeit und Erweiterbarkeit gewährleistet sein.
+\\\\
+Ein wesentliches Entwurfsziel war die Offline-Fähigkeit des Systems. In industriellen Umgebungen kann eine permanente Internetverbindung nicht jederzeit garantiert werden. Das entwickelte System ist daher vollständig offline funktionsfähig. Gleichzeitig wurde eine automatische Update-Funktion integriert, die beim Systemstart eine Verbindung zu einem GitHub-Repository herstellt und neue Versionen des Programmcodes sowie aktualisierte Tutorials bezieht. Dadurch wird eine Kombination aus hoher Betriebssicherheit und zentraler Wartbarkeit erreicht.
+\\\\
+Als Hardwareplattform wurde ein Raspberry Pi gewählt. Entscheidende Kriterien waren die kompakte Bauform, der geringe Energieverbrauch, die kostengünstige Beschaffung sowie bereits vorhandene praktische Erfahrung im Umgang mit dieser Plattform aus dem schulischen Unterricht. Der Raspberry Pi eignet sich besonders für Embedded-Systeme und ermöglicht einen zuverlässigen Dauerbetrieb innerhalb eines geschlossenen Schaltkastens.
+\\\\
+Die Software wurde in der Programmiersprache Python implementiert. Python zeichnet sich durch eine klare Syntax, hohe Lesbarkeit und schnelle Entwicklungszyklen aus. Für die grafische Benutzeroberfläche wurde das in Python integrierte Framework Tkinter verwendet. Trotz gestalterischer Einschränkungen bietet Tkinter eine stabile und ressourcenschonende Lösung, die für den Betrieb auf einem Raspberry Pi geeignet ist. Die Benutzeroberfläche wurde speziell für einen 10-Point-Touch-Monitor optimiert und verfügt über großflächige Bedienelemente sowie eine klare visuelle Struktur.
+\\\\
+Ein weiterer zentraler Bestandteil des Systems ist ein integrierter Administrationsmodus. Dieser kann über einen versteckten Mechanismus aktiviert werden und ist durch ein Passwort geschützt. Dadurch wird verhindert, dass Schüler unbeabsichtigt Tutorials verändern oder löschen. Gleichzeitig ermöglicht der Admin-Modus das Erstellen, Bearbeiten und Verwalten von Lerninhalten direkt am System.
+\\\\
+Die vorliegende Arbeit dokumentiert die Konzeption, Implementierung und Evaluierung des entwickelten Systems. Neben technischen Grundlagen werden Architekturentscheidungen, Datenstrukturen, Sicherheitsaspekte sowie Benutzerfreundlichkeit analysiert und reflektiert. Ziel ist es, sowohl die praktische Umsetzbarkeit als auch die didaktische Eignung des Systems für den Einsatz in einer industriellen Ausbildungsumgebung darzustellen.
+
+% ------------------------------------------------
+\chapter{Grundlagen}
+
+\section{Raspberry Pi}
+
+    \subsection{Eigenschaften und technische Daten}
+        Der Raspberry Pi ist ein Einplatinencomputer, der speziell für Bildungszwecke und den Einsatz in Embedded-Systemen entwickelt wurde. Die verwendete Version, der Raspberry Pi 4 Model B, verfügt über folgende technische Daten:
+        \begin{itemize}
+            \item Quad-Core ARM Cortex-A72 Prozessor mit 1,5 GHz
+            \item 4 GB RAM
+            \item MicroSD-Kartensteckplatz für Betriebssystem und Daten
+            \item 2x USB 3.0, 2x USB 2.0 Anschlüsse
+            \item Gigabit Ethernet, WLAN, Bluetooth 5.0
+            \item 1x Micro-HDMI
+            \item GPIO-Pins (40-polig) für Hardware-Erweiterungen
+            \item Kompakte Bauform: ca. 85,6 mm x 56,5 mm
+            \item Geringer Energieverbrauch (ca. 3–7 Watt)
+        \end{itemize}
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=0.8\textwidth]{raspberrypi_placeholder.png} % Abbildung des Raspberry Pi 4 Model B (Foto oder technische Zeichnung)
+            \caption{Raspberry Pi 4 Model B – typische Hardwareausstattung}
+        \end{figure}
+        Der Raspberry Pi zeichnet sich durch seine Vielseitigkeit, Erweiterbarkeit und die Unterstützung zahlreicher Betriebssysteme (z.B. Raspberry Pi OS, Linux-Distributionen) aus. Die Hardware ist für den Dauerbetrieb ausgelegt und eignet sich besonders für den Einsatz in industriellen und schulischen Projekten.
+
+
+    \subsection{Einsatz im Embedded-Bereich}
+        Der Raspberry Pi wird häufig als Steuerzentrale in Embedded-Systemen eingesetzt. Typische Anwendungen sind Automatisierung, Messdatenerfassung, Steuerung von Maschinen, IoT-Projekte und Prototypenentwicklung. Durch die GPIO-Pins können Sensoren, Aktoren und andere Hardware-Komponenten direkt angebunden werden. Die kompakte Bauform und der geringe Energieverbrauch ermöglichen den Einsatz in geschlossenen Gehäusen und mobilen Systemen.
+        \\\\
+        Beispielhafte Anwendungsfälle im Embedded-Bereich sind:
+        \begin{itemize}
+            \item Steuerung und Überwachung von Prozessen
+            \item Anbindung von Sensoren und Aktoren über GPIO, I2C, SPI und UART
+            \item Datenlogging und Visualisierung
+            \item Entwicklung von Prototypen und Testsystemen
+            \item Integration in industrielle Anlagen und Lehrmittel
+        \end{itemize}
+        Die breite Unterstützung von Programmiersprachen und Betriebssystemen macht den Raspberry Pi besonders flexibel für Embedded-Anwendungen. Zudem stehen zahlreiche Bibliotheken und Frameworks zur Verfügung, die die Entwicklung und Integration erleichtern.
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=0.8\textwidth]{embedded_placeholder.png} % Beispiel für einen Raspberry Pi im Embedded-Einsatz (z.B. im Schaltschrank oder mit Sensoren)
+            \caption{Raspberry Pi im Embedded-Einsatz, z.B. im Schaltschrank mit Sensoren}
+        \end{figure}
+    \subsection{Vorteile}
+        Der Raspberry Pi bietet zahlreiche Vorteile für den Einsatz in technischen und industriellen Projekten:
+        \begin{itemize}
+            \item Kostengünstige Anschaffung im Vergleich zu klassischen Industrie-PCs
+            \item Kompakte Bauform und geringer Platzbedarf
+            \item Niedriger Energieverbrauch
+            \item Große Community und umfangreiche Dokumentation
+            \item Vielfältige Schnittstellen und Erweiterungsmöglichkeiten
+            \item Unterstützung zahlreicher Betriebssysteme und Programmiersprachen
+            \item Einfache Integration in bestehende Systeme
+        \end{itemize}
+        Diese Vorteile machen den Raspberry Pi besonders attraktiv für Bildungseinrichtungen, Prototypenbau und industrielle Anwendungen.
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=0.8\textwidth]{vorteile_placeholder.png} % Vergleichstabelle Raspberry Pi vs. Industrie-PC oder Symbolgrafik Vorteile
+            \caption{Vergleich: Raspberry Pi und klassische Industrie-PCs}
+        \end{figure}
+        
+        \subsection{Eignung für Dauerbetrieb}
+        Der Raspberry Pi ist für den Dauerbetrieb konzipiert und wird häufig in Anwendungen eingesetzt, die eine hohe Zuverlässigkeit erfordern. Die Hardware ist robust und kann auch unter Dauerlast stabil arbeiten. Durch den geringen Energieverbrauch eignet sich der Raspberry Pi ideal für den Einsatz in geschlossenen Gehäusen und Umgebungen mit begrenzter Stromversorgung.
+        \\\\
+        Wichtige Aspekte für den Dauerbetrieb sind:
+        \begin{itemize}
+            \item Zuverlässiger Betrieb über Monate oder Jahre
+            \item Geringe Wärmeentwicklung
+            \item Geeignet für den Einsatz in industriellen Steuerungen und Überwachungssystemen
+            \item Einfache Wartung und Updates
+        \end{itemize}
+        Die Erfahrungen aus zahlreichen Projekten zeigen, dass der Raspberry Pi auch im Dauerbetrieb eine hohe Stabilität und Betriebssicherheit bietet.
+
+\section{Programmiersprache Python}
+    \subsection{Syntax und Lesbarkeit}
+        Python zeichnet sich durch eine klare und leicht verständliche Syntax aus. Der Code ist gut lesbar und ermöglicht es auch Einsteigern, Programme schnell zu verstehen und zu schreiben. Durch die strikte Einrückung wird die Struktur des Codes zusätzlich hervorgehoben. Kommentare und sprechende Variablennamen werden in der Python-Community besonders gefördert, was die Verständlichkeit weiter erhöht. Dies erleichtert die Zusammenarbeit im Team und die spätere Wartung von Projekten.
+
+    \subsection{Wartbarkeit von Code}
+        Die hohe Lesbarkeit und die modulare Struktur von Python-Projekten erleichtern die Wartung und Erweiterung des Codes. Funktionen und Klassen können übersichtlich organisiert werden, was die Fehlersuche und Weiterentwicklung vereinfacht. Durch die dynamische Typisierung und die Möglichkeit, Code in Modulen und Paketen zu strukturieren, lassen sich auch größere Projekte übersichtlich gestalten. Zudem stehen zahlreiche Tools für automatisierte Tests und Code-Analyse zur Verfügung.
+
+    \subsection{Schnelle Entwicklungszeit}
+        Python ermöglicht durch seine umfangreiche Standardbibliothek und die Vielzahl an verfügbaren Paketen eine sehr schnelle Entwicklung von Anwendungen. Viele Aufgaben können mit wenigen Zeilen Code umgesetzt werden. Die große Auswahl an Bibliotheken für verschiedenste Anwendungsbereiche (z.B. Webentwicklung, Datenanalyse, Machine Learning, Automatisierung) beschleunigt die Entwicklung zusätzlich. Auch die einfache Installation von Paketen über den Python Package Index (PyPI) trägt zur Effizienz bei.
+
+    \subsection{Vorteile im Ausbildungsumfeld}
+        Aufgrund der einfachen Syntax und der großen Community eignet sich Python besonders gut für den Einsatz in der Ausbildung. Lernende können schnell eigene Projekte umsetzen und erhalten Unterstützung durch zahlreiche Online-Ressourcen. Python wird weltweit an Schulen und Universitäten eingesetzt und ist für viele der erste Kontakt mit Programmierung. Die Sprache fördert das algorithmische Denken und ermöglicht es, komplexe Sachverhalte auf verständliche Weise zu vermitteln. Zudem gibt es viele frei verfügbare Lehrmaterialien und interaktive Lernplattformen.
+
+\section{GUI-Framework Tkinter}
+    \subsection{Integration in Python}
+        Tkinter ist das Standard-GUI-Toolkit für Python und bereits in der Standardinstallation enthalten. Es ermöglicht die einfache Erstellung grafischer Benutzeroberflächen ohne zusätzliche Abhängigkeiten. Die Programmierung erfolgt vollständig in Python, sodass keine weiteren Programmiersprachen oder Frameworks erlernt werden müssen. Durch die enge Integration in Python lassen sich GUI-Elemente direkt mit der Anwendungslogik verbinden.
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=0.8\textwidth]{tkinter_placeholder.png} % Screenshot einer einfachen Tkinter-Oberfläche
+            \caption{Beispiel einer einfachen Tkinter-Benutzeroberfläche}
+        \end{figure}
+
+    \subsection{Ressourcenverbrauch}
+        Tkinter benötigt im Vergleich zu anderen GUI-Frameworks nur wenig Speicher und Rechenleistung. Dadurch eignet es sich besonders für den Einsatz auf ressourcenschwacher Hardware wie dem Raspberry Pi. Selbst auf älteren oder leistungsschwachen Geräten laufen Tkinter-Anwendungen stabil und flüssig. Dies ist ein entscheidender Vorteil für Embedded-Systeme und Projekte mit begrenzten Ressourcen.
+
+    \subsection{Plattformunabhängigkeit}
+        Anwendungen, die mit Tkinter entwickelt wurden, laufen auf verschiedenen Betriebssystemen wie Windows, Linux und macOS, ohne dass der Quellcode angepasst werden muss. Die grafische Oberfläche passt sich automatisch an das jeweilige Betriebssystem an. Dadurch können Programme einfach verteilt und auf unterschiedlichen Plattformen eingesetzt werden, was die Wartung und Weiterentwicklung erleichtert.
+
+    \subsection{Einschränkungen im Design}
+        Die Gestaltungsmöglichkeiten von Tkinter sind im Vergleich zu modernen Frameworks eingeschränkt. Komplexe oder besonders ansprechende Designs lassen sich nur mit zusätzlichem Aufwand umsetzen. Moderne Animationen, ausgefallene Layouts oder spezielle Bedienelemente sind nur eingeschränkt realisierbar. Für viele Standardanwendungen reicht der Funktionsumfang jedoch aus, insbesondere wenn Funktionalität und Stabilität im Vordergrund stehen.
+
+    \subsection{Eignung für Touch-Systeme}
+        Durch die Unterstützung großer Bedienelemente und einfacher Bedienkonzepte eignet sich Tkinter gut für Touch-Anwendungen, wie sie auf dem Raspberry Pi mit Touchscreen zum Einsatz kommen. Buttons und andere Steuerelemente können so gestaltet werden, dass sie auch mit dem Finger zuverlässig bedient werden können. Die einfache Anpassung der Oberflächenelemente ermöglicht eine gute Usability auf Touch-Geräten.
+
+
+\section{Datenhaltung mittels JSON}
+
+    \subsection{Strukturierte Speicherung}
+        JSON (JavaScript Object Notation) ermöglicht die strukturierte und hierarchische Speicherung von Daten. Komplexe Datenstrukturen wie Listen und Objekte können übersichtlich abgebildet werden. Die klare Struktur erleichtert die Verarbeitung der Daten sowohl durch Menschen als auch durch Maschinen. In Python lassen sich JSON-Daten einfach mit den Standardbibliotheken einlesen und schreiben.
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=0.8\textwidth]{json_placeholder.png} % Beispiel einer JSON-Datei (Ausschnitt aus data.json)
+            \caption{Ausschnitt einer typischen JSON-Datei zur Datenhaltung}
+        \end{figure}
+
+    \subsection{Lesbarkeit}
+        JSON-Dateien sind menschenlesbar und können mit jedem Texteditor betrachtet und bearbeitet werden. Dies erleichtert die Fehlersuche und Anpassung der gespeicherten Daten. Auch für die Dokumentation und den Austausch von Daten zwischen verschiedenen Systemen ist die Lesbarkeit von Vorteil. Fehler in der Datenstruktur lassen sich schnell erkennen und beheben.
+
+    \subsection{Keine externe Datenbank notwendig}
+        Für viele Anwendungen reicht die Speicherung der Daten in JSON-Dateien aus. Es ist keine zusätzliche Datenbanksoftware erforderlich, was die Systemarchitektur vereinfacht. Dies reduziert den Wartungsaufwand und die Komplexität des Systems. Besonders für kleine bis mittlere Projekte ist diese Lösung oft vollkommen ausreichend.
+
+    \subsection{Vorteile für Offline-Systeme}
+        Da JSON-Dateien lokal gespeichert werden, ist der Zugriff auf die Daten auch ohne Internetverbindung möglich. Dies ist besonders für Systeme im Offline-Betrieb von Vorteil. Die Daten sind jederzeit verfügbar und können bei Bedarf einfach gesichert oder übertragen werden. Auch Updates und Anpassungen lassen sich unkompliziert durchführen, ohne dass eine zentrale Datenbank angepasst werden muss.
+
+
+% ------------------------------------------------
+\chapter{Anforderungsanalyse}
+
+\section{Funktionale Anforderungen}
+
+    \subsection{Anzeige von Tutorials}
+        Das System muss in der Lage sein, Tutorials in strukturierter Form darzustellen. Die Tutorials bestehen aus mehreren Seiten, die Schritt für Schritt durchgearbeitet werden können. Jede Seite enthält Text, Bilder und ggf. Quiz-Fragen. Die Navigation zwischen den Seiten erfolgt intuitiv und ist für Touch-Bedienung optimiert.
+
+    \subsection{Unterstützung von Inhalts- und Quiz-Seiten}
+        Neben klassischen Inhaltsseiten, die Wissen vermitteln, gibt es Quiz-Seiten zur Überprüfung des Lernerfolgs. Das System muss beide Seitentypen unterstützen und zwischen ihnen unterscheiden können. Quiz-Seiten enthalten Multiple-Choice-Fragen, deren Beantwortung den Fortschritt im Tutorial beeinflusst.
+        \newpage
+    \subsection{Bildintegration}
+        Bilder sind ein zentraler Bestandteil der Tutorials und dienen der Veranschaulichung technischer Abläufe. Das System muss die Einbindung und Anzeige von Bildern auf jeder Seite ermöglichen. Die Bilder werden lokal gespeichert und können vom Administrator hinzugefügt oder entfernt werden.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\textwidth]{tutorialbildplaceholder.png} % Beispiel-Tutorialseite mit integriertem Bild (Screenshot)
+            \caption{Screenshot einer Tutorialseite mit integriertem Bild}
+        \end{figure}
+
+    \subsection{Zufällige Antwortreihenfolge im Quiz}
+        Um das Auswendiglernen von Antworten zu erschweren, werden die Antwortmöglichkeiten auf Quiz-Seiten bei jedem Durchlauf zufällig angeordnet. Das System sorgt dafür, dass die richtige Antwort immer enthalten ist und die Reihenfolge variiert.
+
+    \subsection{Fortschritt nur bei richtiger Antwort}
+        Der Fortschritt im Tutorial ist an die richtige Beantwortung der Quiz-Fragen gekoppelt. Erst wenn die korrekte Antwort ausgewählt wurde, kann zur nächsten Seite gewechselt werden. Dies stellt sicher, dass das Wissen tatsächlich überprüft wird.
+    \newpage
+    \subsection{Admin-Modus mit Passwortschutz}
+        Der Administrationsmodus ermöglicht das Erstellen, Bearbeiten und Löschen von Tutorials und Quiz-Fragen. Der Zugang zum Admin-Modus ist durch ein Passwort geschützt, um unbefugte Änderungen durch Benutzer zu verhindern. Der Admin-Modus ist über einen versteckten Mechanismus erreichbar und bietet erweiterte Funktionen zur Verwaltung der Lerninhalte.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\textwidth]{admin_placeholder.png} % Screenshot Admin-Modus: Passwortabfrage oder Editor-Ansicht
+            \caption{Admin-Modus: Passwortabfrage oder Editor-Ansicht}
+        \end{figure}
+    \newpage
+    \subsection{Erstellung, Bearbeitung und Löschung von Tutorials}
+            Das System bietet einen Editor, mit dem Tutorials und Quiz-Seiten direkt am Gerät erstellt, bearbeitet und gelöscht werden können. Änderungen werden sofort gespeichert und stehen den Nutzern zur Verfügung.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.8\textwidth]{editor_placeholder.png} % Screenshot des Tutorial-Editors
+                \caption{Editor zur Erstellung und Bearbeitung von Tutorials}
+            \end{figure}
+    \newpage
+    \subsection{Offline-Betrieb}
+            Das System ist vollständig offline-fähig und benötigt keine permanente Internetverbindung. Alle Daten und Tutorials werden lokal gespeichert und sind jederzeit verfügbar.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.8\textwidth]{offline_placeholder.png} % Symbolbild Offline-Betrieb
+                \caption{Symbolbild: Offline-Betrieb des Systems}
+            \end{figure}
+    \newpage
+    \subsection{Automatisches Update über GitHub beim Systemstart}
+        Beim Systemstart wird automatisch geprüft, ob eine neue Version des Programms oder der Tutorials im GitHub-Repository verfügbar ist. Updates werden heruntergeladen und installiert, sofern eine Internetverbindung besteht.
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\textwidth]{update_placeholder.png} % Symbolbild Update-Funktion
+            \caption{Symbolbild: Automatisches Update über GitHub}
+        \end{figure}
+
+\newpage
+\section{Nicht-funktionale Anforderungen}
+
+    \subsection{Touch-Optimierung}
+            Die Benutzeroberfläche ist speziell für Touch-Bedienung ausgelegt. Große Buttons und übersichtliche Layouts sorgen für eine einfache Bedienung.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.8\textwidth]{touch_placeholder.png} % Screenshot Touch-optimierte Oberfläche
+                \caption{Touch-optimierte Benutzeroberfläche}
+            \end{figure}
+    \newpage
+    \subsection{Übersichtliche Benutzeroberfläche}
+            Die Benutzeroberfläche ist klar strukturiert und ermöglicht eine intuitive Navigation. Alle wichtigen Funktionen sind schnell erreichbar und die Darstellung ist auf das Wesentliche reduziert.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.8\textwidth]{ui_placeholder.png} % Screenshot übersichtliche Benutzeroberfläche
+                \caption{Übersichtliche und klar strukturierte Benutzeroberfläche}
+            \end{figure}
+    \subsection{Wartbarkeit des Codes}
+        Der Quellcode ist modular aufgebaut und gut dokumentiert. Änderungen und Erweiterungen können einfach vorgenommen werden. Die Verwendung von Python und klaren Strukturen erleichtert die Wartung.
+        \newpage
+    \subsection{Stabilität im Dauerbetrieb}
+        Das System ist für den Dauerbetrieb ausgelegt und wurde auf dem Raspberry Pi ausgiebig getestet. Auch bei längerer Nutzung bleibt die Performance stabil und es treten keine Speicherprobleme auf.
+            \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.8\textwidth]{dauerbetrieb_placeholder.png} % Diagramm oder Screenshot Langzeitbetrieb
+                    \caption{Langzeitbetrieb: Stabilität und Zuverlässigkeit des Systems}
+                \end{figure}
+        \subsection{Klare Trennung von Benutzer- und Administrationsrechten}
+    Es gibt eine klare Trennung zwischen normalen Benutzern und Administratoren. Nur Administratoren können Tutorials bearbeiten oder löschen, während Benutzer ausschließlich Inhalte konsumieren und Quizfragen beantworten können.
+
+% ------------------------------------------------
+\chapter{Systemarchitektur}
+
+\section{Gesamtstruktur}
+
+    \subsection{main.py als Einstiegspunkt}
+        Die Datei main.py dient als Einstiegspunkt für das gesamte System. Hier wird die Anwendung gestartet und die grundlegende Initialisierung durchgeführt.
+        \newpage
+        \subsection{app\_core.py als zentrale Steuerung}
+        Das Modul app\_core.py übernimmt die zentrale Steuerung der Anwendung. Es verwaltet die Navigation zwischen den verschiedenen Screens und steuert die Kernlogik.
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.8\textwidth]{core_placeholder.png} % Flussdiagramm zentrale Steuerung
+                    \caption{Flussdiagramm: Steuerung der Anwendung durch app\_core.py}
+                \end{figure}
+        \newpage
+        \subsection{Screen-Module (Home, Editor, Viewer, Settings)}
+            Die verschiedenen Screen-Module sind für die Darstellung und Interaktion der jeweiligen Ansichten zuständig. Dazu gehören der HomeScreen, der Editor, der Viewer und die Einstellungen.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.8\textwidth]{screens_placeholder.png} % Screenshot verschiedener Screens
+                \caption{Screens: Home, Editor, Viewer und Settings}
+            \end{figure}
+    \newpage
+    \subsection{data\_store für Dateiverwaltung}
+        Das Modul data\_store übernimmt die Verwaltung und Speicherung der Tutorialdaten und Bilder. Es sorgt für das Laden und Speichern der JSON-Dateien.
+            \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.8\textwidth]{datastore_placeholder.png} % Symbolbild Dateiverwaltung
+                    \caption{Symbolbild: Verwaltung der Daten durch data\_store}
+                \end{figure}
+        \subsection{image\_utils für Bildverarbeitung}
+            Das Modul image\_utils bietet Funktionen zur Verarbeitung und Anzeige von Bildern. Dazu gehören das Skalieren, Zuschneiden und Konvertieren von Bilddateien.
+
+\section{Ordnerstruktur}
+
+    \subsection{tut\_data/}
+        Der Ordner tut\_data/ enthält alle Tutorialdaten und Bilder. Hier werden die einzelnen Tutorials und deren zugehörige Ressourcen abgelegt.
+    \subsection{tutorials/}
+        Im Ordner tutorials/ werden die einzelnen Tutorials als JSON-Dateien gespeichert. Jede Datei repräsentiert ein Tutorial mit mehreren Seiten.
+    \subsection{quizzes/}
+        Der Ordner quizzes/ enthält die Quizdaten, die den Tutorials zugeordnet sind. Die Quizfragen werden ebenfalls als JSON-Dateien abgelegt.
+    \subsection{gemischt/}
+        Im Ordner gemischt/ werden verschiedene Tutorials und Quizdaten zusammengeführt. Dies ermöglicht eine flexible Zuordnung und Mischung von Inhalten.
+    \subsection{Jedes Tutorial mit eigener data.json}
+        Für jedes Tutorial existiert eine eigene data.json-Datei, in der alle relevanten Informationen und Seiten gespeichert sind.
+    \subsection{Separater Image-Ordner pro Tutorial}
+        Zu jedem Tutorial gibt es einen separaten Image-Ordner, in dem die zugehörigen Bilder abgelegt werden. Dies sorgt für Übersichtlichkeit und eine einfache Verwaltung.
+
+\newpage
+\section{Datenmodell}
+
+    \subsection{ID-basierte Identifikation}
+                \begin{figure}[H]
+                    \centering
+                    \includegraphics[width=0.8\textwidth]{id_placeholder.png} % Beispiel ID-Zuordnung
+                    \caption{Beispiel: ID-basierte Zuordnung von Tutorials und Seiten}
+                \end{figure}
+        Tutorials und Quizseiten werden über eindeutige IDs identifiziert. Dies erleichtert die Zuordnung und Verwaltung der Inhalte.
+    \subsection{Seitentypen: content, quiz}
+        Es gibt zwei Seitentypen: Inhaltsseiten (content) und Quizseiten (quiz). Inhaltsseiten vermitteln Wissen, Quizseiten überprüfen das Verständnis.
+        \newpage
+        \subsection{JSON-Struktur}
+            Die Daten werden in einer klar definierten JSON-Struktur gespeichert. Diese Struktur ermöglicht eine einfache Verarbeitung und Erweiterung.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.8\textwidth]{datenmodell_placeholder.png} % Beispiel JSON-Struktur
+                \caption{Beispielhafte JSON-Struktur für Tutorials und Quizdaten}
+            \end{figure}
+    \subsection{Trennung von Metadaten und Seiteninhalt}
+        Metadaten (z.B. Titel, Autor, Datum) werden von den eigentlichen Seiteninhalten getrennt gespeichert. Dies sorgt für Übersichtlichkeit und erleichtert die Verwaltung.
+
+
+% ------------------------------------------------
+\chapter{Implementierung}
+
+\section{Benutzeroberfläche}
+
+    \subsection{Kartenlayout im HomeScreen}
+            Der HomeScreen verwendet ein Kartenlayout, um die Tutorials übersichtlich darzustellen. Jede Karte repräsentiert ein Tutorial und zeigt wichtige Informationen auf einen Blick.
+            \begin{figure}[h!]
+                \centering
+                \includegraphics[width=0.8\textwidth]{karten_placeholder.png} % Screenshot Kartenlayout
+                \caption{Kartenlayout im HomeScreen zur Darstellung der Tutorials}
+            \end{figure}
+    \subsection{Vorschau-Icons}
+            Tutorials werden im HomeScreen mit Vorschau-Icons dargestellt, die einen schnellen Überblick über den Inhalt bieten.
+            \begin{figure}[h!]
+                \centering
+                \includegraphics[width=0.8\textwidth]{icon_placeholder.png} % Beispiel Vorschau-Icon
+                \caption{Vorschau-Icon im HomeScreen}
+            \end{figure}
+    \subsection{Scrollbare Oberfläche}
+                \begin{figure}[h!]
+                    \centering
+                    \includegraphics[width=0.8\textwidth]{scroll_placeholder.png} % Screenshot scrollbare Oberfläche
+                    \caption{Scrollbare Oberfläche für viele Tutorials und Seiten}
+                \end{figure}
+        Die Oberfläche ist scrollbar gestaltet, sodass auch bei vielen Tutorials und Seiten eine einfache Navigation möglich ist.
+    \subsection{Touch-optimierte Buttons}
+    Alle Buttons sind für die Touch-Bedienung optimiert und lassen sich auch mit dem Finger zuverlässig bedienen.
+
+
+\section{Quiz-System}
+
+    \subsection{Dynamische Antwortbuttons}
+        Im Quiz-System werden die Antwortbuttons dynamisch generiert. Die Reihenfolge und Anzahl der Antworten kann flexibel angepasst werden.
+    \subsection{Zufällige Reihenfolge}
+        Die Reihenfolge der Antwortmöglichkeiten wird bei jedem Durchlauf zufällig gewählt, um das Auswendiglernen zu erschweren.
+    \subsection{Richtige Antwort erforderlich für Fortschritt}
+        Nur bei Auswahl der richtigen Antwort kann im Quiz-System zum nächsten Schritt gewechselt werden. Dies stellt sicher, dass das Wissen tatsächlich überprüft wird.
+    \subsection{Feedbackmechanismus}
+                \begin{figure}[h!]
+                    \centering
+                    \includegraphics[width=0.8\textwidth]{feedback_placeholder.png} % Beispiel Feedbackanzeige Quiz
+                    \caption{Direktes Feedback nach Beantwortung einer Quizfrage}
+                \end{figure}
+        Nach der Beantwortung einer Quizfrage erhält der Nutzer direktes Feedback, ob die Antwort richtig oder falsch war.
+
+
+\section{Editor}
+
+    \subsection{Dynamisches Hinzufügen von Seiten}
+        Im Editor können neue Seiten dynamisch hinzugefügt werden. Dies ermöglicht eine flexible Erweiterung der Tutorials.
+    \subsection{Löschen einzelner Seiten}
+        Seiten können im Editor einzeln gelöscht werden, ohne das gesamte Tutorial zu entfernen.
+    \subsection{Bildintegration}
+    Bilder können im Editor einfach zu den einzelnen Seiten hinzugefügt werden. Die Integration erfolgt über den Image-Ordner des jeweiligen Tutorials.
+    \subsection{Trennung zwischen Inhalts- und Quiz-Seiten}
+        Im Editor wird klar zwischen Inhaltsseiten und Quizseiten unterschieden. Dies erleichtert die Strukturierung und Verwaltung der Tutorials.
+
+
+\section{Admin-Modus}
+
+    \subsection{Versteckter Aktivierungsmechanismus}
+        Der Admin-Modus kann nur über einen versteckten Mechanismus aktiviert werden, um unbefugten Zugriff zu verhindern.
+    \subsection{Passwortabfrage}
+        Beim Wechsel in den Admin-Modus wird eine Passwortabfrage eingeblendet. Nur berechtigte Personen können Änderungen vornehmen.
+    \subsection{Rechteverwaltung}
+    Die Rechteverwaltung sorgt dafür, dass nur Administratoren Tutorials bearbeiten oder löschen können. Benutzer haben ausschließlich Leserechte.
+
+
+% ------------------------------------------------
+\chapter{Tests und Validierung}
+
+
+    \section{Funktionstests}
+    \section{Belastungstest auf Raspberry Pi}
+    \section{Touch-Bedienbarkeit}
+    \section{Fehlerszenarien}
+    \section{Benutzerakzeptanz in der Lehrlingswerkstatt}
+
+
+% ------------------------------------------------
+\chapter{Probleme und Lösungen}
+
+
+    \section{Limitierungen von Tkinter}
+    \section{Scrollbare Frames}
+    \section{Bildspeicherverwaltung}
+    \section{UI-Layout-Probleme}
+    \section{Rechteverwaltungskonzept}
+
+
+% ------------------------------------------------
+\chapter{Erweiterungsmöglichkeiten}
+
+
+    \section{Datenbankanbindung}
+    \section{Online-Synchronisation}
+    \section{Benutzerkonten}
+    \section{Statistikfunktionen}
+    \section{Mehrsprachigkeit}
+
+
+% ------------------------------------------------
+\chapter{Fazit}
+
+
+    \section{Zielerreichung}
+    \section{Bewertung der technischen Umsetzung}
+    \section{Praxistauglichkeit}
+    \section{Persönliche Lernerfahrungen}
+
+
+\end{document}
